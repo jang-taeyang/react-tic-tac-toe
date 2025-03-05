@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 function Square({ value, onSquareClick }) {
   return (
@@ -14,13 +14,20 @@ function Board({ xIsNext, squares, onPlay }) {
       return;
     }
     const nextSquares = squares.slice();
-    if (xIsNext) {
-      nextSquares[i] = 'X';
-    } else {
-      nextSquares[i] = 'O';
-    }
+    nextSquares[i] = 'X';
     onPlay(nextSquares);
   }
+
+  useEffect(() => {
+    if (!xIsNext) {
+      const bestMove = findBestMove(squares);
+      if (bestMove !== null) {
+        const nextSquares = squares.slice();
+        nextSquares[bestMove] = 'O';
+        onPlay(nextSquares);
+      }
+    }
+  }, [xIsNext, squares, onPlay]);
 
   const winner = calculateWinner(squares);
   let status;
@@ -68,6 +75,11 @@ export default function Game() {
     setCurrentMove(nextMove);
   }
 
+  function resetGame() {
+    setHistory([Array(9).fill(null)]);
+    setCurrentMove(0);
+  }
+
   const moves = history.map((squares, move) => {
     let description;
     if (move > 0) {
@@ -89,6 +101,7 @@ export default function Game() {
       </div>
       <div className="game-info">
         <ol>{moves}</ol>
+        <button onClick={resetGame}>Reset</button>
       </div>
     </div>
   );
@@ -96,20 +109,36 @@ export default function Game() {
 
 function calculateWinner(squares) {
   const lines = [
-    [0, 1, 2],
-    [3, 4, 5],
-    [6, 7, 8],
-    [0, 3, 6],
-    [1, 4, 7],
-    [2, 5, 8],
-    [0, 4, 8],
-    [2, 4, 6],
+    [0, 1, 2], [3, 4, 5], [6, 7, 8],
+    [0, 3, 6], [1, 4, 7], [2, 5, 8],
+    [0, 4, 8], [2, 4, 6]
   ];
-  for (let i = 0; i < lines.length; i++) {
-    const [a, b, c] = lines[i];
+  for (let [a, b, c] of lines) {
     if (squares[a] && squares[a] === squares[b] && squares[a] === squares[c]) {
       return squares[a];
     }
   }
   return null;
+}
+
+function findBestMove(squares) {
+  const moveOrder = [4, 0, 2, 6, 8, 1, 3, 5, 7];
+  
+  for (let i = 0; i < 9; i++) {
+    if (!squares[i]) {
+      const testSquares = squares.slice();
+      testSquares[i] = 'O';
+      if (calculateWinner(testSquares) === 'O') return i;
+    }
+  }
+
+  for (let i = 0; i < 9; i++) {
+    if (!squares[i]) {
+      const testSquares = squares.slice();
+      testSquares[i] = 'X';
+      if (calculateWinner(testSquares) === 'X') return i;
+    }
+  }
+  
+  return moveOrder.find(i => !squares[i]) || null;
 }
