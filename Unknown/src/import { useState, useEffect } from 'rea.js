@@ -68,43 +68,14 @@ export default function Game() {
 
   // Find the best move for the computer
   function findBestMove(squares, player) {
-    const opponent = player === 'X' ? 'O' : 'X';
-
-    // Step 1: Check if the computer can win
+    // A basic placeholder for the "best move" function. Replace with actual logic.
     for (let i = 0; i < squares.length; i++) {
       if (!squares[i]) {
         const newSquares = squares.slice();
         newSquares[i] = player;
-        if (calculateWinner(newSquares) === player) {
-          return newSquares; // Computer wins by placing at index i
-        }
-      }
-    }
-
-    // Step 2: Check if the computer needs to block the opponent
-    for (let i = 0; i < squares.length; i++) {
-      if (!squares[i]) {
-        const newSquares = squares.slice();
-        newSquares[i] = opponent;
-        if (calculateWinner(newSquares) === opponent) {
-          newSquares[i] = player; // Block the opponent's winning move
-          return newSquares;
-        }
-      }
-    }
-
-    // Step 3: If no winning or blocking move is found, prioritize based on move order
-    const moveOrder = [4, 0, 2, 6, 8, 1, 3, 5, 7];
-    for (let i = 0; i < moveOrder.length; i++) {
-      const index = moveOrder[i];
-      if (!squares[index]) {
-        const newSquares = squares.slice();
-        newSquares[index] = player; // Place the move at the first available spot in the move order
         return newSquares;
       }
     }
-
-    // If no move is found, return the original squares (although this shouldn't happen in a valid game)
     return squares;
   }
 
@@ -133,9 +104,7 @@ export default function Game() {
   });
 
   // Check if the game is over (winner or all squares filled)
-  const winner = calculateWinner(currentSquares);
-  const isTie = !winner && currentSquares.every(square => square !== null);
-  const isGameOver = winner || isTie;
+  const isGameOver = calculateWinner(currentSquares) || currentSquares.every(square => square !== null);
 
   return (
     <div className="game">
@@ -147,7 +116,6 @@ export default function Game() {
           Switch to Player {isPlayerX ? 'O' : 'X'}
         </button>
         <ol>{moves}</ol>
-        {isTie && <div className="status">It's a tie!</div>}
       </div>
     </div>
   );
